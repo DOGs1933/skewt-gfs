@@ -8,7 +8,7 @@ Esta entrega funciona directamente en Linux, sin Docker. Git permite versionar e
 
 Requisitos: Linux con systemd, Python 3.11 o 3.12 y soporte `venv`, certificados CA y salida HTTPS a NOMADS. La instalación inicial también necesita acceso a los paquetes de Python. En Debian/Ubuntu puede requerir instalar `python3-venv`, `libgomp1` y `fonts-dejavu-core` mediante el administrador. `doctor` verifica que las dependencias meteorológicas se carguen. Reserve inicialmente 2 GB de RAM y varios GB de disco; es una orientación, no una medición de consumo.
 
-1. Clone el repositorio privado `https://github.com/DOGs1933/skewt-gfs.git` en una carpeta propia del usuario del servidor, sin espacios en la ruta, y entre en `skewt-gfs`. Necesita acceso autorizado a esa cuenta de GitHub. También puede descomprimir el paquete e ingresar en su carpeta `skewt_gfs`.
+1. Clone el repositorio público `https://github.com/DOGs1933/skewt-gfs.git` en una carpeta propia del usuario del servidor, sin espacios en la ruta, y entre en `skewt-gfs`. La descarga por HTTPS no requiere iniciar sesión en GitHub. También puede descomprimir el paquete e ingresar en su carpeta `skewt_gfs`.
 2. Revise `config.toml`: coordenadas, nombres, horizonte y conservación de datos. `storage.root = "data"` guarda los productos junto al programa, en una subcarpeta dedicada. También puede indicar una ruta absoluta.
 3. Prepare el ambiente virtual y ejecute las pruebas:
 
@@ -57,7 +57,7 @@ La galería está en `data/index.html`. Puede copiar la carpeta de un lote compl
 
 ## Git, dependencias y actualizaciones
 
-Se incluye `.gitignore` para excluir el ambiente virtual, los datos, la demostración y los registros. `.gitattributes` mantiene los scripts con finales de línea compatibles con Linux. Para obtener el programa desde el repositorio privado:
+Se incluye `.gitignore` para excluir el ambiente virtual, los datos, la demostración y los registros. `.gitattributes` mantiene los scripts con finales de línea compatibles con Linux. Para obtener el programa desde el repositorio público:
 
 ```sh
 git clone https://github.com/DOGs1933/skewt-gfs.git
