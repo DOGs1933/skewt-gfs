@@ -1,0 +1,7 @@
+# Python 3.11/3.12. Direct meteorological packages pinned; transitive versions
+# are resolved by pip and recorded in every run's manifest.
+metpy==1.7.1
+eccodes==2.44.0
+matplotlib>=3.8,<4
+numpy>=1.26,<3
+tzdata>=2025.2,<2027

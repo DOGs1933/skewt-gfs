@@ -1,0 +1,65 @@
+# Coordenadas editables. Revise la ubicación exacta y, si la conoce, añada elevation_m.
+# Santa Cruz se sitúa en Viru Viru: corrige el -66.13 de los scripts R.
+[storage]
+root = "data"
+raw_days = 30
+image_days = 90
+failed_days = 7
+
+[forecast]
+timezone = "America/La_Paz"
+horizon_hours = 6
+step_hours = 1
+poll_seconds = 900
+max_cycle_age_hours = 18
+levels = [1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 550, 500, 450, 400, 350, 300, 250, 200, 150, 100, 70, 50]
+
+[download]
+request_pause_seconds = 10
+timeout_seconds = 60
+download_deadline_seconds = 180
+retries = 2
+max_download_mb = 20
+
+[quality]
+extraction = "nearest" # Un nodo fijo por estación para todas las variables; alternativa: bilinear.
+max_distance_km = 50
+terrain_warning_m = 500
+min_levels = 8
+max_top_hpa = 200
+max_gap_hpa = 150
+
+[graphics]
+png = true
+dpi = 130
+logo = "" # Ruta opcional relativa a este archivo; el logo se añade a PNG.
+
+[[stations]]
+id = "EL_ALTO"
+name = "Aeropuerto El Alto"
+lat = -16.52
+lon = -68.18
+
+[[stations]]
+id = "TRINIDAD"
+name = "Trinidad"
+lat = -14.8205
+lon = -64.917
+
+[[stations]]
+id = "SANTA_CRUZ"
+name = "Santa Cruz - Viru Viru"
+lat = -17.64472
+lon = -63.13528
+
+[[stations]]
+id = "ORURO"
+name = "Oruro"
+lat = -18.05
+lon = -67.07
+
+[[stations]]
+id = "COCHABAMBA"
+name = "Cochabamba"
+lat = -17.45
+lon = -66.10
