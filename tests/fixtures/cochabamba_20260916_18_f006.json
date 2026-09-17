@@ -1,0 +1,112 @@
+{
+  "station": {
+    "id": "COCHABAMBA",
+    "name": "Cochabamba",
+    "lat": -17.45,
+    "lon": -66.1,
+    "elevation_m": null
+  },
+  "cycle_utc": "2026-09-16T18:00:00Z",
+  "valid_utc": "2026-09-17T00:00:00Z",
+  "forecast_hour": 6,
+  "model_terrain_m": 3028.219375,
+  "source": "NOAA NOMADS; GFS GRIB2 sha256 9060c2b9a569f19cf8db1bdeac4135ac7787ae1dfd56f62b1fe9a7a0d633a72c",
+  "rows": [
+    {
+      "pressure_hpa": 709.9911875000001,
+      "altitude_m": 3030.219375,
+      "temperature_c": 13.224023437500023,
+      "dewpoint_c": 4.358520507812557
+    },
+    {
+      "pressure_hpa": 700,
+      "altitude_m": 3146.915625,
+      "temperature_c": 11.920917968750018,
+      "dewpoint_c": 3.840253338481068
+    },
+    {
+      "pressure_hpa": 650,
+      "altitude_m": 3764.8025000000002,
+      "temperature_c": 10.150058593750032,
+      "dewpoint_c": -6.88978084291215
+    },
+    {
+      "pressure_hpa": 600,
+      "altitude_m": 4425.8965625,
+      "temperature_c": 6.463710937500025,
+      "dewpoint_c": -7.767145524827474
+    },
+    {
+      "pressure_hpa": 550,
+      "altitude_m": 5132.3871875,
+      "temperature_c": 0.5433984375000023,
+      "dewpoint_c": -7.4415907513798
+    },
+    {
+      "pressure_hpa": 500,
+      "altitude_m": 5888.6575,
+      "temperature_c": -5.231679687499991,
+      "dewpoint_c": -17.35473424468985
+    },
+    {
+      "pressure_hpa": 450,
+      "altitude_m": 6706.93875,
+      "temperature_c": -10.84619140625,
+      "dewpoint_c": -20.35155550446789
+    },
+    {
+      "pressure_hpa": 400,
+      "altitude_m": 7601.3925,
+      "temperature_c": -16.75,
+      "dewpoint_c": -19.862123800132082
+    },
+    {
+      "pressure_hpa": 350,
+      "altitude_m": 8593.53875,
+      "temperature_c": -22.314648437499983,
+      "dewpoint_c": -33.0996069843312
+    },
+    {
+      "pressure_hpa": 300,
+      "altitude_m": 9705.258125,
+      "temperature_c": -31.506074218749973,
+      "dewpoint_c": -39.466645144539775
+    },
+    {
+      "pressure_hpa": 250,
+      "altitude_m": 10969.62,
+      "temperature_c": -40.380722656249986,
+      "dewpoint_c": -54.00390133456039
+    },
+    {
+      "pressure_hpa": 200,
+      "altitude_m": 12455.33,
+      "temperature_c": -51.520683593749965,
+      "dewpoint_c": -61.61772361587741
+    },
+    {
+      "pressure_hpa": 150,
+      "altitude_m": 14256.75875,
+      "temperature_c": -65.81843749999996,
+      "dewpoint_c": -73.65191744023754
+    },
+    {
+      "pressure_hpa": 100,
+      "altitude_m": 16643.35875,
+      "temperature_c": -73.69724609374998,
+      "dewpoint_c": -81.76775637315038
+    },
+    {
+      "pressure_hpa": 70,
+      "altitude_m": 18727.55375,
+      "temperature_c": -71.58009765624996,
+      "dewpoint_c": -86.71696116769355
+    },
+    {
+      "pressure_hpa": 50,
+      "altitude_m": 20765.9675,
+      "temperature_c": -61.23050781249998,
+      "dewpoint_c": -89.96569574314069
+    }
+  ]
+}

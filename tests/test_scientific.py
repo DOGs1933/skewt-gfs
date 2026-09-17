@@ -1,4 +1,4 @@
-"""Dependency integration smoke tests; automatically run in the Linux image build."""
+"""Dependency integration tests; automatically run by the Linux installer."""
 import importlib.util
 import tempfile
 import unittest

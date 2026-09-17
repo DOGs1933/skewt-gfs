@@ -132,7 +132,9 @@ La presión es la del nivel original. HGT ya representa altura geopotencial en m
 
 La base del perfil combina presión superficial, T/Td a 2 m y viento a 10 m del modelo. No equivale a una observación en el aeropuerto. La orografía de GFS puede diferir mucho en los Andes; añadir `elevation_m` permite advertir diferencias, **no corregir automáticamente el terreno**. Los niveles eliminados y avisos acompañan cada producto.
 
-Calcula CAPE/CIN de parcela superficial del modelo y LCL con [MetPy](https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.surface_based_cape_cin.html). No se afirma equivalencia numérica exacta con todos los índices de los scripts R anteriores. La versión inicial no reproduce su envío de correo ni todos los índices de convección/cizalladura. El PNG usa los diagramas meteorológicos de MetPy; el SVG es una vista complementaria con isobaras, isotermas, adiabáticas secas y hodógrafa, sin toda la retícula húmeda del PNG.
+Calcula CAPE/CIN y LCL para parcelas SB (superficie), MU (máxima theta-e en los primeros 3 km) y ML (capa hasta 500 m AGL), con MetPy y corrección de temperatura virtual. El LCL se muestra en metros sobre el terreno GFS y también en hPa para SB. Cuando no existe LFC, CIN aparece como `s/LFC`, con `null` en JSON; el cero convencional de MetPy se conserva por separado. No debe interpretarse como ausencia de inhibición. La trayectoria dibujada es SB e incluye el LCL.
+
+La [auditoría de CAPE/CIN](AUDITORIA_CAPE_CIN.md) explica las diferencias con R, incluida su posible selección de niveles bajo tierra. No se promete igualdad numérica con thundeR. Se interpola a una malla numérica de hasta 1 hPa para integrar; esto no aumenta la resolución meteorológica del GFS. No se reproducen el envío de correo ni todos los índices de convección/cizalladura anteriores. El PNG usa los diagramas meteorológicos de MetPy; el SVG es una vista complementaria con isobaras, isotermas, adiabáticas secas y hodógrafa, sin toda la retícula húmeda del PNG.
 
 ## Pruebas y comandos
 
@@ -155,4 +157,4 @@ python -m skewt_gfs run --cycle 2026-09-16T06:00:00Z --at 2026-09-16T10:00:00Z -
 
 Las fechas anteriores son un ejemplo de sintaxis, no una garantía de disponibilidad. Un lote histórico se archiva y no sustituye a otro con ciclo y vigencia más recientes. `--force` crea otro lote, sin sobrescribir el archivo anterior.
 
-**Verificación realizada al entregar:** 22 pruebas de lógica, calidad, descarga simulada, bloqueo y publicación pasaron; 2 pruebas de integración científica quedaron omitidas por falta de MetPy/ecCodes/matplotlib en este entorno. Se generaron y comprobaron 35 perfiles sintéticos. No se ejecutaron systemd ni la descarga NOAA real desde este equipo. Estos controles pendientes están incorporados al flujo de instalación en Linux. No hay acceso SSH configurado ni servicio activado en un servidor remoto.
+**Verificación de la versión 1.1.0:** 29 pruebas aprobadas, incluidas ecCodes, MetPy, gráficos, perfiles inestables/inhibidos, convergencia numérica y regresión del caso real de Cochabamba. Se descargaron datos reales de NOAA para las cinco localidades y se comprobó la publicación completa de 15 perfiles (f000, f006 y f012 del ciclo 16/09/2026 18 UTC). Véase [VALIDACION.md](VALIDACION.md). No se ejecutó systemd ni se modificó el servidor remoto desde este equipo.

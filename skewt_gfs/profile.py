@@ -139,25 +139,5 @@ def extract_profile(grid, station, cfg):
 
 
 def compute_indices(profile):
-    import numpy as np
-    import metpy.calc as calc
-    from metpy.units import units
-    rows = profile["rows"]
-    p = np.array([r["pressure_hpa"] for r in rows]) * units.hPa
-    t = units.Quantity([r["temperature_c"] for r in rows], "degC")
-    td = units.Quantity([r["dewpoint_c"] for r in rows], "degC")
-    cape, cin = calc.surface_based_cape_cin(p, t, td)
-    lcl_p, lcl_t = calc.lcl(p[0], t[0], td[0])
-    parcel = calc.parcel_profile(p, t[0], td[0]).to("degC")
-    result = {"SB_CAPE_J_kg": float(cape.to("J/kg").magnitude), "SB_CIN_J_kg": float(cin.to("J/kg").magnitude),
-              "LCL_hPa": float(lcl_p.to("hPa").magnitude), "LCL_temperature_C": float(lcl_t.to("degC").magnitude),
-              "parcel": "SB desde superficie del modelo (T/Td 2 m)",
-              "integration_top_hPa": rows[-1]["pressure_hpa"]}
-    if not all(math.isfinite(v) for v in result.values() if isinstance(v, (float, int))):
-        raise ValueError("Índices no finitos; perfil rechazado")
-    profile["indices"] = result
-    for row, value in zip(rows, parcel.magnitude):
-        if not math.isfinite(float(value)):
-            raise ValueError("Trayectoria de parcela no finita")
-        row["parcel_temperature_c"] = float(value)
-    return profile
+    from .indices import calculate
+    return calculate(profile)

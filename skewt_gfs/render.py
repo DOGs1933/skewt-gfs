@@ -11,6 +11,23 @@ from .planning import parse_time
 from .storage import atomic_json
 
 
+def index_lines(profile):
+    if not profile.get("parcels"):
+        return ["Sin índices calculados en esta vista"]
+    def fmt(value):
+        return "N/D" if value is None else f"{value:.0f}"
+    lines = ["Parcela  CAPE    CIN    LCL", "         J/kg   J/kg   m AGL"]
+    for name, parcel in profile["parcels"].items():
+        cin = "s/LFC" if parcel["status"] == "no_lfc" else fmt(parcel["CIN_J_kg"])
+        lines.append(f"{name:3} {fmt(parcel['CAPE_J_kg']):>8} {cin:>6} {fmt(parcel['LCL_m_AGL']):>6}")
+    lines += ["s/LFC: CIN no definido sin LFC", "AGL: sobre el terreno del modelo",
+              "SB: superficie · MU: 0–3 km", "ML: capa hasta 500 m AGL",
+              f"LCL SB: {profile['indices']['LCL_hPa']:.0f} hPa"]
+    if any(p["status"] == "el_above_profile" for p in profile["parcels"].values()):
+        lines.append("Sin EL: CAPE limitado al tope")
+    return lines
+
+
 def write_profile(profile, folder: Path, stem: str):
     atomic_json(folder / f"{stem}.json", profile)
     rows = profile["rows"]
@@ -57,7 +74,9 @@ def svg_plot(profile, path: Path, tz: str, demo=False):
         parts.append(f'<polyline points="{coords}" fill="none" stroke="#deb887" stroke-opacity=".5" stroke-dasharray="3 5"/>')
     for key, color in [("temperature_c", "#d8453e"), ("dewpoint_c", "#12835d"), ("parcel_temperature_c", "#7761a9")]:
         if key in rows[0]:
-            coords = " ".join(f'{x(r[key],r["pressure_hpa"]):.1f},{y(r["pressure_hpa"]):.1f}' for r in rows)
+            trace = profile.get("parcel_trace") if key == "parcel_temperature_c" else None
+            points = zip(trace["pressure_hpa"], trace["temperature_c"]) if trace else ((r["pressure_hpa"], r[key]) for r in rows)
+            coords = " ".join(f'{x(temp,pres):.1f},{y(pres):.1f}' for pres, temp in points)
             parts.append(f'<polyline points="{coords}" fill="none" stroke="{color}" stroke-width="2.8"/>')
     parts.append('</g>')
     for t in range(-40, 51, 10):
@@ -74,17 +93,12 @@ def svg_plot(profile, path: Path, tz: str, demo=False):
               f'<line x1="{cx}" y1="{cy-radius}" x2="{cx}" y2="{cy+radius}" stroke="#bdcbd6"/>']
     points = " ".join(f'{cx+r["u_ms"]/speed_range*radius:.1f},{cy-r["v_ms"]/speed_range*radius:.1f}' for r in rows)
     parts.append(f'<polyline points="{points}" fill="none" stroke="#285a91" stroke-width="2.5"/>')
-    lines = ["Rojo: temperatura · Verde: rocío", "Violeta: parcela, cuando disponible", f'Terreno del modelo: {profile["model_terrain_m"]:.0f} m',
+    lines = index_lines(profile) + ["Rojo: T · Verde: Td · Violeta: SB",
+             f'Terreno modelo: {profile["model_terrain_m"]:.0f} m',
              f'Extracción: {profile["extraction"]}', "Base: T/Td 2 m; viento 10 m"]
-    indices = profile.get("indices", {})
-    for key, label, unit in [("SB_CAPE_J_kg", "SB CAPE", "J/kg"), ("SB_CIN_J_kg", "SB CIN", "J/kg"), ("LCL_hPa", "LCL", "hPa")]:
-        if key in indices:
-            lines.append(f"{label}: {indices[key]:.1f} {unit}")
-    if not indices:
-        lines.append("Sin índices calculados en esta vista")
     lines.append(f'Avisos de calidad: {len(profile["warnings"])} (ver JSON)')
     for i, line in enumerate(lines):
-        parts.append(f'<text x="755" y="{490+i*23}">{esc(line)}</text>')
+        parts.append(f'<text x="755" y="{465+i*21}" style="font-family:monospace;white-space:pre">{esc(line)}</text>')
     parts += ['<text x="50" y="825" class="small">Perfil del modelo, no radiosondeo observado. Superficie referida al terreno de GFS. Datos y procedencia en CSV/JSON.</text>', '</svg>']
     path.write_text("\n".join(parts), encoding="utf-8")
 
@@ -107,8 +121,13 @@ def png_plot(profile, path: Path, cfg):
         skew = SkewT(fig, rotation=45, rect=(.08, .13, .55, .72))
         skew.plot(p, t, color="#d8453e", linewidth=2, label="Temperatura")
         skew.plot(p, td, color="#12835d", linewidth=2, label="Rocío")
-        parcel = units.Quantity([r["parcel_temperature_c"] for r in rows], "degC")
-        skew.plot(p, parcel, color="#7761a9", linewidth=1.5, label="Parcela SB modelo")
+        trace = profile["parcel_trace"]
+        skew.plot(np.array(trace["pressure_hpa"]) * units.hPa,
+                  units.Quantity(trace["temperature_c"], "degC"),
+                  color="#7761a9", linewidth=1.5, label="Parcela SB modelo")
+        skew.plot(profile["indices"]["LCL_hPa"] * units.hPa,
+                  units.Quantity(profile["indices"]["LCL_temperature_C"], "degC"),
+                  marker="o", color="#7761a9", markersize=5, label="LCL SB")
         skew.plot_barbs(p, u.to("knots"), v.to("knots"))
         skew.ax.set_ylim(min(1050, rows[0]["pressure_hpa"]+25), 100)
         skew.ax.set_xlim(-40, 45)
@@ -126,12 +145,12 @@ def png_plot(profile, path: Path, cfg):
         local = parse_time(profile["valid_utc"]).astimezone(ZoneInfo(cfg.timezone)).strftime("%d/%m/%Y %H:%M %Z")
         fig.suptitle(profile["station"]["name"] + " · GFS 0,25°", fontsize=17, y=.965)
         fig.text(.08, .905, f"Válido: {local} | {profile['valid_utc']}\nCiclo: {profile['cycle_utc']} | f{profile['forecast_hour']:03d}", fontsize=9)
-        indices = profile["indices"]
-        text = (f"SB CAPE: {indices['SB_CAPE_J_kg']:.0f} J/kg\nSB CIN: {indices['SB_CIN_J_kg']:.0f} J/kg\n"
-                f"LCL: {indices['LCL_hPa']:.0f} hPa\n\nTerreno modelo: {profile['model_terrain_m']:.0f} m\n"
-                f"Método: {profile['extraction']}\nAvisos: {len(profile['warnings'])} (ver JSON)\n\n"
-                "Superficie: T/Td 2 m, viento 10 m.\nLos índices describen el modelo.")
-        fig.text(.71, .42, text, va="top", fontsize=9, linespacing=1.5)
+        text = "\n".join(index_lines(profile) + [
+            f"Terreno GFS: {profile['model_terrain_m']:.0f} m",
+            f"Método: {profile['extraction']} · Avisos: {len(profile['warnings'])}",
+            "T/Td: 2 m · viento: 10 m",
+            "Barbas: kt · hodógrafa: m/s"])
+        fig.text(.70, .43, text, va="top", fontsize=8.5, linespacing=1.4, family="monospace")
         fig.text(.08, .035, "Perfil modelado, no radiosondeo observado. La orografía local puede diferir del terreno GFS.", fontsize=8)
         if cfg.logo:
             logo_ax = fig.add_axes((.88, .88, .08, .08))
