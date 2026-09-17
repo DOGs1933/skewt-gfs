@@ -86,3 +86,26 @@ usar una selección consistente si se configura expresamente.
 - [MetPy: parcela mezclada](https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.mixed_parcel.html).
 
 Los scripts R originales no fueron modificados ni incluidos en este repositorio.
+
+## Ampliación posterior: versión 1.2.0
+
+La descarga incluye ahora los 16 niveles intermedios del
+[producto complementario GFS](https://nomads.ncep.noaa.gov/gribfilter.php?ds=gfs_0p25b):
+875, 825, 775, 725, 675, 625, 575, 525, 475, 425, 375, 325, 275, 225, 175 y 125 hPa.
+Son campos originales del producto, no interpolaciones creadas por este programa.
+Se solicitan temperatura, RH, altura y u/v en los 39 niveles combinados.
+
+El producto principal aporta además CAPE/CIN nativos de superficie y de las capas
+0–90, 0–180 y 0–255 hPa sobre el terreno. Se conserva su identidad: no se asume
+que sean numéricamente equivalentes a nuestros SB, MU de 3 km o ML de 500 m.
+
+En f006 de la misma corrida, **GFS también proporciona CAPE superficial cero en
+las cinco localidades**. Incorporar más niveles no cambia ese resultado, pero sí
+otros índices: MU CAPE de El Alto pasa de 5,12 a 13,44 J/kg. En Cochabamba, la
+altura interpolada del LCL SB pasa de 1117 a 1118 m AGL; la presión sigue siendo
+620,7115 hPa. No se trata de una corrección de la elevación real de la estación.
+
+Las comparaciones de otras horas y los límites de esta comprobación figuran en
+[VALIDACION.md](VALIDACION.md). Los pequeños residuos de CAPE/CIN debidos al
+empaquetado GRIB se distinguen usando su `packingError`, conservando el número
+original en JSON.

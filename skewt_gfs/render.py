@@ -15,7 +15,9 @@ def index_lines(profile):
     if not profile.get("parcels"):
         return ["Sin índices calculados en esta vista"]
     def fmt(value):
-        return "N/D" if value is None else f"{value:.0f}"
+        if value is None:
+            return "N/D"
+        return f"{value:.2g}" if 0 < abs(value) < 1 else (f"{value:.1f}" if 0 < abs(value) < 10 else f"{value:.0f}")
     lines = ["Parcela  CAPE    CIN    LCL", "         J/kg   J/kg   m AGL"]
     for name, parcel in profile["parcels"].items():
         cin = "s/LFC" if parcel["status"] == "no_lfc" else fmt(parcel["CIN_J_kg"])
@@ -25,6 +27,17 @@ def index_lines(profile):
               f"LCL SB: {profile['indices']['LCL_hPa']:.0f} hPa"]
     if any(p["status"] == "el_above_profile" for p in profile["parcels"].values()):
         lines.append("Sin EL: CAPE limitado al tope")
+    diagnostics = profile.get("gfs_diagnostics", {})
+    if diagnostics:
+        lines += ["", "Diagnósticos GFS · J/kg", "Capa hPa       CAPE     CIN"]
+        for key, record in diagnostics.items():
+            label = "Superficie" if key == "surface" else f"0–{record['depth_hPa']}"
+            def native_fmt(name):
+                value=record[name]
+                error=record.get("metadata", {}).get(name, {}).get("packing_error_J_kg",0)
+                return "~0" if value is not None and 0 < abs(value) <= error else fmt(value)
+            lines.append(f"{label:10} {native_fmt('CAPE_J_kg'):>7} {native_fmt('CIN_J_kg'):>7}")
+        lines += ["~0: dentro de precisión GRIB", "Capas GFS no equivalen a MU/ML"]
     return lines
 
 
@@ -51,8 +64,8 @@ def svg_plot(profile, path: Path, tz: str, demo=False):
         return top + height * math.log(p / ptop) / math.log(pbottom / ptop)
     def x(t, p):
         return left + width * (t + 45 + 35 * math.log(1000 / p)) / 95
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 850" role="img"><title>{esc(profile["station"]["name"])} - Skew-T</title>',
-             '<rect width="1120" height="850" fill="#f4f7fa"/>',
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1050" role="img"><title>{esc(profile["station"]["name"])} - Skew-T</title>',
+             '<rect width="1120" height="1050" fill="#f4f7fa"/>',
              '<style>text{font-family:Arial,sans-serif;fill:#183044;font-size:13px}.small{font-size:11px}.title{font-size:25px;font-weight:bold}</style>',
              f'<defs><clipPath id="plot"><rect x="{left}" y="{top}" width="{width}" height="{height}"/></clipPath></defs>']
     label = "DEMOSTRACIÓN SINTÉTICA · NO ES UN PRONÓSTICO" if demo else "GFS 0,25° · PERFIL MODELADO"
@@ -99,7 +112,7 @@ def svg_plot(profile, path: Path, tz: str, demo=False):
     lines.append(f'Avisos de calidad: {len(profile["warnings"])} (ver JSON)')
     for i, line in enumerate(lines):
         parts.append(f'<text x="755" y="{465+i*21}" style="font-family:monospace;white-space:pre">{esc(line)}</text>')
-    parts += ['<text x="50" y="825" class="small">Perfil del modelo, no radiosondeo observado. Superficie referida al terreno de GFS. Datos y procedencia en CSV/JSON.</text>', '</svg>']
+    parts += ['<text x="50" y="1025" class="small">Perfil del modelo, no radiosondeo observado. Superficie referida al terreno de GFS. Datos y procedencia en CSV/JSON.</text>', '</svg>']
     path.write_text("\n".join(parts), encoding="utf-8")
 
 
@@ -116,7 +129,7 @@ def png_plot(profile, path: Path, cfg):
     td = units.Quantity([r["dewpoint_c"] for r in rows], "degC")
     u = np.array([r["u_ms"] for r in rows]) * units("m/s")
     v = np.array([r["v_ms"] for r in rows]) * units("m/s")
-    fig = plt.figure(figsize=(12, 8), facecolor="#f4f7fa")
+    fig = plt.figure(figsize=(12, 9), facecolor="#f4f7fa")
     try:
         skew = SkewT(fig, rotation=45, rect=(.08, .13, .55, .72))
         skew.plot(p, t, color="#d8453e", linewidth=2, label="Temperatura")
@@ -150,7 +163,7 @@ def png_plot(profile, path: Path, cfg):
             f"Método: {profile['extraction']} · Avisos: {len(profile['warnings'])}",
             "T/Td: 2 m · viento: 10 m",
             "Barbas: kt · hodógrafa: m/s"])
-        fig.text(.70, .43, text, va="top", fontsize=8.5, linespacing=1.4, family="monospace")
+        fig.text(.70, .43, text, va="top", fontsize=8, linespacing=1.3, family="monospace")
         fig.text(.08, .035, "Perfil modelado, no radiosondeo observado. La orografía local puede diferir del terreno GFS.", fontsize=8)
         if cfg.logo:
             logo_ax = fig.add_axes((.88, .88, .08, .08))

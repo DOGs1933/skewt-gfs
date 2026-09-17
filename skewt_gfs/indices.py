@@ -87,6 +87,14 @@ def calculate(profile, step_hpa=1.0):
                      units.Quantity(np.r_[ml_td.to("degC").magnitude, td[above].magnitude], "degC"),
                      "ML: theta y mezcla de vapor medias, ponderadas por presión, hasta 500 m AGL")
     profile["parcels"] = {"SB": sb, "MU": mu, "ML": ml}
+    native = profile.get("gfs_diagnostics", {}).get("surface", {})
+    if native:
+        native_cape = native.get("CAPE_J_kg")
+        profile["gfs_comparison"] = {
+            "surface_cape_delta_J_kg": None if native_cape is None else sb["CAPE_J_kg"] - native_cape,
+            "surface_cape_zero_disagreement": None if native_cape is None else (sb["CAPE_J_kg"] == 0) != (native_cape == 0),
+            "note": "GFS y MetPy usan formulaciones/perfiles de cálculo diferentes. Los diagnósticos GFS son referencia del mismo modelo, no observaciones. No equiparar capas en hPa con MU 3 km o ML 500 m.",
+        }
     profile["parcel_trace"] = trace
     profile["indices"] = {
         **{f"{name}_{key}": result[key] for name, result in profile["parcels"].items()

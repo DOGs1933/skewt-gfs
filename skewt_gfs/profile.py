@@ -130,12 +130,37 @@ def extract_profile(grid, station, cfg):
             raise ValueError("Perfil sin monotonía de presión/altura")
         if lower.pressure_hpa - upper.pressure_hpa > cfg.max_gap_hpa:
             raise ValueError("Hueco vertical excesivo")
+    diagnostics = {}
+    from .dataset import DIAGNOSTIC_LAYERS
+    for depth in DIAGNOSTIC_LAYERS:
+        if ("gfs_cape", depth) not in grid.fields or ("gfs_cin", depth) not in grid.fields:
+            continue  # Synthetic demonstrations have no native model diagnostics.
+        record = {"layer": "surface" if depth == 0 else f"0–{depth} hPa above model ground",
+                  "depth_hPa": depth, "metadata": {}}
+        for name, output in (("gfs_cape", "CAPE_J_kg"), ("gfs_cin", "CIN_J_kg")):
+            data = values(name, depth)
+            value = mean(data) if finite(data) else None
+            field_meta = grid.field_metadata.get((name, depth), {})
+            packing_error = field_meta.get("packing_error_J_kg", 0)
+            record.setdefault("raw_values", {})[output] = value
+            # GRIB packing can turn physical zero CIN into e.g. +0.42 J/kg.
+            # Preserve the decoded value when its sign is within packing precision.
+            if value is not None and ((name == "gfs_cape" and value < -packing_error) or (name == "gfs_cin" and value > packing_error)):
+                value = None
+            record[output] = value
+            record["metadata"][output] = field_meta
+            if value is None:
+                notes.append(f"Diagnóstico {name}, capa {depth} hPa: valor ausente o fuera de rango en los nodos del perfil.")
+        diagnostics["surface" if depth == 0 else f"layer_{depth}hPa"] = record
     return {"station": asdict(station), "cycle_utc": iso(grid.cycle), "valid_utc": iso(grid.valid),
             "forecast_hour": int((grid.valid - grid.cycle).total_seconds() / 3600),
             "extraction": cfg.extraction, "nodes": node_meta, "model_terrain_m": h0,
             "surface_reference": "Superficie modelada: T/Td a 2 m y viento a 10 m; no observación de estación.",
             "dewpoint_method": "Magnus sobre agua: a=17.625,b=243.04; aproximación en aire muy frío",
-            "warnings": notes, "dropped_levels": dropped, "rows": [asdict(row) for row in rows]}
+            "warnings": notes, "dropped_levels": dropped, "gfs_diagnostics": diagnostics,
+            "vertical_coverage": {"requested_isobaric_levels": len(cfg.levels), "retained_isobaric_levels": len(rows)-1,
+                                  "largest_pressure_gap_hPa": max(a.pressure_hpa-b.pressure_hpa for a,b in zip(rows,rows[1:]))},
+            "rows": [asdict(row) for row in rows]}
 
 
 def compute_indices(profile):

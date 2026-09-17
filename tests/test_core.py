@@ -12,7 +12,7 @@ from urllib.parse import parse_qs, urlparse
 
 from skewt_gfs.config import load_config, Station
 from skewt_gfs.demo import synthetic_grid
-from skewt_gfs.download import Downloader, DownloadError, build_url, validate_grib
+from skewt_gfs.download import Downloader, DownloadError, NotAvailable, build_url, validate_grib
 from skewt_gfs.planning import parse_time, floor_cycle, target_hours, forecast_hours, iso
 from skewt_gfs.profile import extract_profile, wind_direction, dewpoint, select_nodes
 from skewt_gfs.runner import produce, run
@@ -53,6 +53,69 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(params["lev_2_m_above_ground"], ["on"])
         self.assertEqual(params["var_PRES"], ["on"])
         self.assertLess(float(params["rightlon"][0])-float(params["leftlon"][0]), 10)
+        self.assertEqual(params["var_CAPE"], ["on"])
+        self.assertEqual(params["var_CIN"], ["on"])
+        self.assertEqual(params["lev_255-0_mb_above_ground"], ["on"])
+        self.assertNotIn("lev_675_mb", params)
+        secondary = parse_qs(urlparse(build_url(self.cfg, CYCLE, 12, "secondary")).query)
+        self.assertEqual(secondary["file"], ["gfs.t18z.pgrb2b.0p25.f012"])
+        self.assertEqual(secondary["lev_675_mb"], ["on"])
+        self.assertNotIn("lev_700_mb", secondary)
+        self.assertNotIn("lev_surface", secondary)
+
+    def test_secondary_levels_enabled_for_existing_configuration(self):
+        self.assertEqual(len(self.cfg.levels),39)
+        self.assertEqual(self.cfg.levels[:37], list(range(1000,99,-25)))
+        target = self.base / "without-secondary.toml"
+        target.write_text(CONFIG.read_text(encoding="utf-8").replace("[forecast]", "[forecast]\ninclude_secondary_levels = false"), encoding="utf-8")
+        self.assertEqual(len(load_config(target).levels),23)
+
+    def test_secondary_unavailable_prevents_readiness(self):
+        requests=[]
+        def opener(request, timeout):
+            requests.append(request.full_url)
+            if "pgrb2b" in request.full_url:
+                raise HTTPError(request.full_url,404,"not ready",{},None)
+            return io.BytesIO(f"1:0:d={CYCLE:%Y%m%d%H}:TMP:".encode())
+        d=Downloader(self.cfg,Store(self.cfg.root),opener=opener,sleeper=lambda _:None)
+        self.assertFalse(d.available(CYCLE,6))
+        self.assertEqual(len(requests),2)
+
+    def test_secondary_failure_does_not_assemble_partial_profile(self):
+        store=Store(self.cfg.root)
+        requests=[]
+        def opener(request,timeout):
+            requests.append(request.full_url)
+            if "pgrb2b" in request.full_url:
+                raise HTTPError(request.full_url,404,"not ready",{},None)
+            return io.BytesIO(message())
+        d=Downloader(self.cfg,store,opener=opener,sleeper=lambda _:None)
+        with self.assertRaises(NotAvailable):
+            d.download(CYCLE,6)
+        self.assertFalse(list(store.root.rglob("profile_*.grib2")))
+        self.assertFalse(list(store.root.rglob("*.part")))
+        self.assertEqual(len(list(store.root.rglob("gfs_f006.grib2"))),1)
+
+    def test_native_diagnostics_use_same_nodes_and_keep_layers(self):
+        grid=synthetic_grid(self.cfg,CYCLE,CYCLE)
+        for depth in (0,90,180,255):
+            grid.fields["gfs_cape",depth]=[float(i+depth) for i in range(len(grid.latitudes))]
+            grid.fields["gfs_cin",depth]=[-float(i+depth) for i in range(len(grid.latitudes))]
+        cfg=replace(self.cfg,extraction="bilinear")
+        station=cfg.stations[1]
+        nodes,_=select_nodes(grid,station,cfg.extraction,50)
+        profile=extract_profile(grid,station,cfg)
+        expected=sum((i+180)*w for i,w in nodes)
+        self.assertAlmostEqual(profile["gfs_diagnostics"]["layer_180hPa"]["CAPE_J_kg"],expected)
+        self.assertAlmostEqual(profile["gfs_diagnostics"]["layer_180hPa"]["CIN_J_kg"],-expected)
+        grid.fields["gfs_cape",0][nodes[0][0]]=math.nan
+        profile=extract_profile(grid,station,cfg)
+        self.assertIsNone(profile["gfs_diagnostics"]["surface"]["CAPE_J_kg"])
+        self.assertTrue(any("gfs_cape" in w for w in profile["warnings"]))
+        grid.fields["gfs_cin",180]=[.42]*len(grid.latitudes)
+        grid.field_metadata["gfs_cin",180]={"packing_error_J_kg":.5}
+        profile=extract_profile(grid,station,cfg)
+        self.assertAlmostEqual(profile["gfs_diagnostics"]["layer_180hPa"]["CIN_J_kg"],.42)
 
     def test_config_rejects_typo_and_duplicate_station(self):
         text = CONFIG.read_text(encoding="utf-8")
@@ -144,10 +207,15 @@ class CoreTests(unittest.TestCase):
         downloader = Downloader(self.cfg, store, opener=opener, sleeper=pauses.append)
         path, meta = downloader.download(CYCLE, 6)
         downloader.download(CYCLE, 6)
-        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(calls), 2)
         path.write_bytes(b"broken")
         downloader.download(CYCLE, 6)
         self.assertEqual(len(calls), 2)
+        self.assertEqual(validate_grib(path), 2, "Rebuild damaged assembly from checked source files")
+        component = next(store.root.rglob("gfs_f006.grib2"))
+        component.write_bytes(b"broken source")
+        downloader.download(CYCLE, 6)
+        self.assertEqual(len(calls), 3)
         self.assertGreater(pauses[0], 9)
 
     def test_404_and_permission_error_distinguished(self):

@@ -76,3 +76,16 @@ class ParcelTests(unittest.TestCase):
         profile["rows"] = profile["rows"][:5]
         with self.assertRaisesRegex(ValueError, "Cobertura"):
             calculate(profile)
+
+    def test_extended_real_profile_keeps_gfs_diagnostics_separate(self):
+        path=Path(__file__).parent / "fixtures" / "el_alto_20260916_18_f006_extended.json"
+        profile=json.loads(path.read_text(encoding="utf-8"))
+        reference=copy.deepcopy(profile["gfs_diagnostics"])
+        result=calculate(profile)
+        self.assertEqual(result["gfs_diagnostics"],reference)
+        self.assertEqual(result["indices"]["SB_CAPE_J_kg"],0)
+        self.assertAlmostEqual(result["indices"]["MU_CAPE_J_kg"],13.4434,delta=.2)
+        self.assertEqual(reference["layer_180hPa"]["CAPE_J_kg"],24.)
+        self.assertFalse(result["gfs_comparison"]["surface_cape_zero_disagreement"])
+        self.assertIn("Diagnósticos GFS", " ".join(index_lines(result)))
+        json.dumps(result,allow_nan=False)

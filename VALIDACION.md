@@ -1,5 +1,53 @@
 # Estado de verificación
 
+## Versión 1.2.0: descarga ampliada
+
+17 de septiembre de 2026 UTC, mismas bibliotecas que se detallan en la revisión anterior.
+
+- **34 pruebas aprobadas, ninguna omitida**: 26 de lógica/descarga/calidad,
+  6 de índices y 2 de integración científica con múltiples verificaciones GRIB.
+- Activación automática de los niveles complementarios en la configuración existente:
+  39 niveles solicitados; 16 provienen de `pgrb2b`.
+- Comprobación de disponibilidad de ambas fuentes, caché independiente y reconstrucción
+  del ensamblado si se corrompe. Un complementario ausente no genera un perfil parcial.
+- Lectura estricta de ocho diagnósticos CAPE/CIN, con capas en Pa convertidas a hPa.
+  Se rechazan campos faltantes o discrepancias de ciclo, hora y malla.
+- Prueba de extracción con los mismos nodos y pesos del perfil, y de tolerancia al
+  error de empaquetado GRIB sin perder los valores originales.
+- **35 perfiles reales publicados** con CSV, JSON, SVG, PNG y manifiesto: cinco
+  localidades, f000 a f006 del ciclo 16/09/2026 18 UTC. Se inspeccionó visualmente
+  el PNG con las tablas MetPy y GFS.
+
+El primer lote ampliado tardó **161,875 s**, sin contar la búsqueda previa de
+disponibilidad. Descargó 1 026 785 bytes, incluidos los inventarios; f006 ya estaba
+en caché. La suma de las dos fuentes para los siete plazos fue **1 178 561 bytes**.
+Son mediciones de este equipo Windows, no del servidor Linux. Un día de cuatro
+lotes equivalentes implica aproximadamente **4,7 MB** de GRIB más consultas y reintentos.
+
+Comparaciones obtenidas (J/kg):
+
+| Caso | SB CAPE MetPy, 39 niveles | CAPE GFS, superficie |
+|---|---:|---:|
+| El Alto f000 | 137,86 | 61 |
+| Cochabamba f000 | 87,52 | 41 |
+| Trinidad f000 | 54,92 | 0 |
+| Las cinco localidades f006 | 0 | 0 |
+
+Las diferencias entre formulaciones se conservan, no se fuerzan a coincidir.
+GFS es una referencia del mismo modelo, no un radiosondeo observado.
+En El Alto f006, MU CAPE cambia de 5,12 a 13,44 J/kg al incorporar los niveles
+intermedios. El CAPE GFS de la capa 0–180 hPa es 24 J/kg; esa capa no equivale a
+nuestra búsqueda MU en 3 km. El nuevo caso está incluido en `tests/fixtures/`.
+
+El CIN nativo puede contener residuos de empaquetado: se verificó, por ejemplo,
+un valor de +0,4213 J/kg con `packingError` de 0,5000 J/kg. Se conserva ese valor
+en JSON y se muestra `~0`, sin tratarlo como dato faltante.
+
+No se modificaron `config.toml`, las dependencias ni el servidor remoto. Los
+pasos de actualización al final de este documento siguen siendo aplicables.
+
+## Histórico: versión 1.1.0, antes de ampliar los datos
+
 17 de septiembre de 2026 UTC. Versión 1.1.0; Windows, Python 3.12.14,
 MetPy 1.7.1, ecCodes Python 2.44.0, NumPy 2.5.3, SciPy 1.18.1 y Matplotlib 3.11.2.
 

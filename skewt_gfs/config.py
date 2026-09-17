@@ -47,10 +47,12 @@ class Config:
     png: bool = True
     dpi: int = 130
     logo: Path | None = None
+    include_secondary_levels: bool = True
 
     def scientific_dict(self):
         return {
             "stations": [vars(s) for s in self.stations], "levels": self.levels,
+            "include_secondary_levels": self.include_secondary_levels,
             "extraction": self.extraction, "max_distance_km": self.max_distance_km,
             "terrain_warning_m": self.terrain_warning_m, "min_levels": self.min_levels,
             "max_top_hpa": self.max_top_hpa, "max_gap_hpa": self.max_gap_hpa,
@@ -83,7 +85,7 @@ def load_config(path: str | Path) -> Config:
         raise ValueError(f"Secciones desconocidas: {set(data) - allowed}")
     sections = {
         "storage": {"root", "raw_days", "image_days", "failed_days"},
-        "forecast": {"timezone", "horizon_hours", "step_hours", "poll_seconds", "max_cycle_age_hours", "levels"},
+        "forecast": {"timezone", "horizon_hours", "step_hours", "poll_seconds", "max_cycle_age_hours", "levels", "include_secondary_levels"},
         "download": {"request_pause_seconds", "timeout_seconds", "download_deadline_seconds", "retries", "max_download_mb"},
         "quality": {"extraction", "max_distance_km", "terrain_warning_m", "min_levels", "max_top_hpa", "max_gap_hpa"},
         "graphics": {"png", "dpi", "logo"},
@@ -123,6 +125,12 @@ def load_config(path: str | Path) -> Config:
     levels = values.pop("levels", [1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 550, 500, 450, 400, 350, 300, 250, 200, 150, 100, 70, 50])
     if not levels or any(type(p) is not int or not 1 <= p <= 1000 for p in levels) or len(set(levels)) != len(levels):
         raise ValueError("Niveles inválidos o duplicados")
+    from .dataset import SECONDARY_LEVELS
+    extended = values.get("include_secondary_levels", True)
+    if type(extended) is not bool:
+        raise ValueError("include_secondary_levels debe ser true o false")
+    if extended:
+        levels = sorted(set(levels) | {p for p in SECONDARY_LEVELS if min(levels) <= p <= max(levels)}, reverse=True)
     cfg = Config(path, root, stations, sorted(levels, reverse=True), logo=logo_path, **values)
     ZoneInfo(cfg.timezone)
     limits = {"horizon_hours": (1, 72), "step_hours": (1, 6), "poll_seconds": (60, 86400),

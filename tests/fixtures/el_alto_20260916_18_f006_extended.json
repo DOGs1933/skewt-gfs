@@ -1,0 +1,298 @@
+{
+  "station": {
+    "id": "EL_ALTO",
+    "name": "Aeropuerto El Alto",
+    "lat": -16.52,
+    "lon": -68.18,
+    "elevation_m": null
+  },
+  "cycle_utc": "2026-09-16T18:00:00Z",
+  "valid_utc": "2026-09-17T00:00:00Z",
+  "model_terrain_m": 4002.459375,
+  "gfs_diagnostics": {
+    "surface": {
+      "layer": "surface",
+      "depth_hPa": 0,
+      "metadata": {
+        "CAPE_J_kg": {
+          "typeOfLevel": "surface",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.5,
+          "parameterCategory": 7,
+          "parameterNumber": 6,
+          "top_offset_hPa": 0,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        },
+        "CIN_J_kg": {
+          "typeOfLevel": "surface",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.050012207031250006,
+          "parameterCategory": 7,
+          "parameterNumber": 7,
+          "top_offset_hPa": 0,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        }
+      },
+      "raw_values": {
+        "CAPE_J_kg": 0.0,
+        "CIN_J_kg": -0.046679687500000004
+      },
+      "CAPE_J_kg": 0.0,
+      "CIN_J_kg": -0.046679687500000004
+    },
+    "layer_90hPa": {
+      "layer": "0–90 hPa above model ground",
+      "depth_hPa": 90,
+      "metadata": {
+        "CAPE_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.5,
+          "parameterCategory": 7,
+          "parameterNumber": 6,
+          "top_offset_hPa": 90,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        },
+        "CIN_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.050006103515625004,
+          "parameterCategory": 7,
+          "parameterNumber": 7,
+          "top_offset_hPa": 90,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        }
+      },
+      "raw_values": {
+        "CAPE_J_kg": 0.0,
+        "CIN_J_kg": -0.03466796875
+      },
+      "CAPE_J_kg": 0.0,
+      "CIN_J_kg": -0.03466796875
+    },
+    "layer_180hPa": {
+      "layer": "0–180 hPa above model ground",
+      "depth_hPa": 180,
+      "metadata": {
+        "CAPE_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.5,
+          "parameterCategory": 7,
+          "parameterNumber": 6,
+          "top_offset_hPa": 180,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        },
+        "CIN_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.5000152587890625,
+          "parameterCategory": 7,
+          "parameterNumber": 7,
+          "top_offset_hPa": 180,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        }
+      },
+      "raw_values": {
+        "CAPE_J_kg": 24.0,
+        "CIN_J_kg": -2.5787353515625
+      },
+      "CAPE_J_kg": 24.0,
+      "CIN_J_kg": -2.5787353515625
+    },
+    "layer_255hPa": {
+      "layer": "0–255 hPa above model ground",
+      "depth_hPa": 255,
+      "metadata": {
+        "CAPE_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.5,
+          "parameterCategory": 7,
+          "parameterNumber": 6,
+          "top_offset_hPa": 255,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        },
+        "CIN_J_kg": {
+          "typeOfLevel": "pressureFromGroundLayer",
+          "units": "J kg**-1",
+          "packing_error_J_kg": 0.050012207031250006,
+          "parameterCategory": 7,
+          "parameterNumber": 7,
+          "top_offset_hPa": 255,
+          "bottom_offset_hPa": 0,
+          "source": "GFS native diagnostic; not a MetPy calculation"
+        }
+      },
+      "raw_values": {
+        "CAPE_J_kg": 0.0,
+        "CIN_J_kg": -0.046679687500000004
+      },
+      "CAPE_J_kg": 0.0,
+      "CIN_J_kg": -0.046679687500000004
+    }
+  },
+  "sources_sha256": [
+    "f7f6755ad1cdd4acc1ec1445f30246bcc607c91768e5d917ecb58edaac0380de",
+    "233710394787fb502160a42af639a7001473f152065a77fcc539de62c920a72a"
+  ],
+  "rows": [
+    {
+      "pressure_hpa": 631.5591875,
+      "altitude_m": 4004.459375,
+      "temperature_c": 6.8240234375000455,
+      "dewpoint_c": -0.2414794921874659
+    },
+    {
+      "pressure_hpa": 625,
+      "altitude_m": 4087.4096875,
+      "temperature_c": 5.780058593750027,
+      "dewpoint_c": -0.5502003097625091
+    },
+    {
+      "pressure_hpa": 600,
+      "altitude_m": 4420.1365625,
+      "temperature_c": 3.283710937500018,
+      "dewpoint_c": -1.7839481635506056
+    },
+    {
+      "pressure_hpa": 575,
+      "altitude_m": 4765.1615625,
+      "temperature_c": 2.221289062500034,
+      "dewpoint_c": -3.3366523392699756
+    },
+    {
+      "pressure_hpa": 550,
+      "altitude_m": 5123.0671875,
+      "temperature_c": -0.14660156249999545,
+      "dewpoint_c": -3.72855180142391
+    },
+    {
+      "pressure_hpa": 525,
+      "altitude_m": 5494.1225,
+      "temperature_c": -2.8456640624999636,
+      "dewpoint_c": -3.8622769932517604
+    },
+    {
+      "pressure_hpa": 500,
+      "altitude_m": 5879.4175000000005,
+      "temperature_c": -5.4316796874999795,
+      "dewpoint_c": -6.161092825396726
+    },
+    {
+      "pressure_hpa": 475,
+      "altitude_m": 6280.490625,
+      "temperature_c": -7.900039062499957,
+      "dewpoint_c": -11.406284941203166
+    },
+    {
+      "pressure_hpa": 450,
+      "altitude_m": 6698.45875,
+      "temperature_c": -11.02619140624995,
+      "dewpoint_c": -12.164392406823486
+    },
+    {
+      "pressure_hpa": 425,
+      "altitude_m": 7135.62625,
+      "temperature_c": -13.430039062499986,
+      "dewpoint_c": -14.814479793404077
+    },
+    {
+      "pressure_hpa": 400,
+      "altitude_m": 7594.9525,
+      "temperature_c": -15.909999999999968,
+      "dewpoint_c": -16.780633661869686
+    },
+    {
+      "pressure_hpa": 375,
+      "altitude_m": 8079.09,
+      "temperature_c": -18.549999999999983,
+      "dewpoint_c": -19.225957487762336
+    },
+    {
+      "pressure_hpa": 350,
+      "altitude_m": 8589.73875,
+      "temperature_c": -22.44464843749998,
+      "dewpoint_c": -22.44464843749998
+    },
+    {
+      "pressure_hpa": 325,
+      "altitude_m": 9129.58,
+      "temperature_c": -26.502675781249962,
+      "dewpoint_c": -26.502675781249962
+    },
+    {
+      "pressure_hpa": 300,
+      "altitude_m": 9702.338125,
+      "temperature_c": -31.076074218749966,
+      "dewpoint_c": -31.07607421874996
+    },
+    {
+      "pressure_hpa": 275,
+      "altitude_m": 10313.0725,
+      "temperature_c": -35.71097656249998,
+      "dewpoint_c": -36.49037234928924
+    },
+    {
+      "pressure_hpa": 250,
+      "altitude_m": 10968.9,
+      "temperature_c": -40.350722656249985,
+      "dewpoint_c": -45.10389011830646
+    },
+    {
+      "pressure_hpa": 225,
+      "altitude_m": 11680.84125,
+      "temperature_c": -44.51193359374997,
+      "dewpoint_c": -60.05358516547883
+    },
+    {
+      "pressure_hpa": 200,
+      "altitude_m": 12457.17,
+      "temperature_c": -51.64068359374997,
+      "dewpoint_c": -60.488426176770844
+    },
+    {
+      "pressure_hpa": 175,
+      "altitude_m": 13308.81625,
+      "temperature_c": -58.30109374999998,
+      "dewpoint_c": -65.79848789065318
+    },
+    {
+      "pressure_hpa": 150,
+      "altitude_m": 14262.83875,
+      "temperature_c": -64.78843749999999,
+      "dewpoint_c": -75.47420598756725
+    },
+    {
+      "pressure_hpa": 125,
+      "altitude_m": 15353.69125,
+      "temperature_c": -72.58019531249997,
+      "dewpoint_c": -79.5057030947706
+    },
+    {
+      "pressure_hpa": 100,
+      "altitude_m": 16647.19875,
+      "temperature_c": -75.18724609374996,
+      "dewpoint_c": -81.66524253157964
+    },
+    {
+      "pressure_hpa": 70,
+      "altitude_m": 18731.79375,
+      "temperature_c": -69.28009765624998,
+      "dewpoint_c": -86.71161063343571
+    },
+    {
+      "pressure_hpa": 50,
+      "altitude_m": 20763.0075,
+      "temperature_c": -63.810507812499964,
+      "dewpoint_c": -89.3043812592717
+    }
+  ]
+}

@@ -12,6 +12,7 @@ from logging.handlers import RotatingFileHandler
 
 from .config import load_config
 from .download import build_url
+from .dataset import products
 from .planning import candidate_cycles, forecast_hours, target_hours, parse_time, iso
 from .runner import run, versions
 from .storage import Store, AlreadyRunning
@@ -51,7 +52,8 @@ def main(argv=None):
         print(json.dumps({"note": "Plan sin descargar. La disponibilidad se comprueba al ejecutar.", "bounds": cfg.bounds,
             "valid_times": list(map(iso, targets)), "stations": [vars(s) for s in cfg.stations],
             "products": len(targets)*len(cfg.stations), "cycles": list(map(iso, candidates)),
-            "example_urls": [build_url(cfg, candidates[0], h) for h in forecast_hours(candidates[0], targets)]}, indent=2))
+            "levels": cfg.levels,
+            "example_urls": [build_url(cfg, candidates[0], h, product) for h in forecast_hours(candidates[0], targets) for product in products(cfg)]}, indent=2))
         return 0
     if args.command == "demo":
         from .demo import demo
